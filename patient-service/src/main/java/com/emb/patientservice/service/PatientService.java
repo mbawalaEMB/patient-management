@@ -4,10 +4,12 @@ import com.emb.patientservice.PatientMapper;
 import com.emb.patientservice.dto.PatientRequestDTO;
 import com.emb.patientservice.dto.PatientResponseDTO;
 import com.emb.patientservice.exception.EmailAlreadyExistsException;
-import com.emb.patientservice.exception.PatientNotExistsException;
 import com.emb.patientservice.exception.PatientNotFoundException;
+import com.emb.patientservice.kafka.KafkaProducer;
 import com.emb.patientservice.model.Patient;
 import com.emb.patientservice.repository.PatientRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,10 +19,18 @@ import java.util.UUID;
 @Service
 public class PatientService {
 
-    private final PatientRepository patientRepository;
+    private static final Logger logger = LoggerFactory.getLogger(PatientService.class);
 
-    public PatientService(PatientRepository patientRepository) {
+    private final PatientRepository patientRepository;
+    private final BillingGrpcClientService billingGrpcClientService;
+    private final KafkaProducer kafkaProducer;
+
+
+    public PatientService(PatientRepository patientRepository, BillingGrpcClientService billingGrpcClientService
+    , KafkaProducer kafkaProducer) {
         this.patientRepository = patientRepository;
+        this.billingGrpcClientService = billingGrpcClientService;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public List<PatientResponseDTO> getPatients() {
@@ -30,11 +40,16 @@ public class PatientService {
     }
 
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
+        logger.info("------------------- createPatient ----------------");
         String email = patientRequestDTO.getEmail();
         if (patientRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException(String.format("A patient with the email [%s] already exists", email));
         }
         Patient patient = patientRepository.save(PatientMapper.toEntity(patientRequestDTO));
+
+        // Creating a billing account for this patient
+        billingGrpcClientService.createBillingAccount(patient.getId(), patient.getName(), patient.getEmail());
+        kafkaProducer.sendEvent(patient);
 
         return PatientMapper.toDto(patient);
     }

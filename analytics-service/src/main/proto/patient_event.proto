@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.emb.patient.events;
+option java_multiple_files = true;
+
+message PatientEvent {
+    string patientId = 1;
+    string name = 2;
+    string email = 3;
+    // describes particular event inside a topic
+    string event_type = 4;
+}

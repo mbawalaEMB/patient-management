@@ -7,11 +7,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      # - "5432:5432"
+      - "${PATIENT_DB_PORT:-5432}:5432"
     volumes:
       - patient-service-db-data:/var/lib/postgresql/data
     networks:
-      - internal-network
+      - patient-management-network
       
   patient-service:
     #image: patient-service:latest
@@ -27,12 +28,16 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_SQL_INIT_MODE: always
+      #BILLING_SERVICE_ADDRESS: billing-service
+      #BILLING_SERVICE_GRPC_PORT: 9001
+      #BILLING_GRPC_ADDRESS: static://billing-service:9001
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
-      - "4000:4000"
+      - "${PATIENT_SERVICE_PORT:-4000}:4000"
     networks:
-      - internal-network
+      - patient-management-network
 volumes:
   patient-service-db-data:
     
 networks:
-  internal-network:
+  patient-management-network:

@@ -2,7 +2,7 @@ package com.emb.patientservice.controller;
 
 import com.emb.patientservice.dto.PatientRequestDTO;
 import com.emb.patientservice.dto.PatientResponseDTO;
-import com.emb.patientservice.service.PatientBillingService;
+import com.emb.patientservice.service.BillingGrpcClientService;
 import com.emb.patientservice.service.PatientService;
 import com.emb.patientservice.validators.CreatePatientGroupValidator;
 import com.emb.patientservice.validators.PatchPatientGroupValidator;
@@ -24,11 +24,8 @@ public class PatientController {
 
     private final PatientService patientService;
 
-    private final PatientBillingService patientBillingService;
-
-    public PatientController(PatientService patientService, PatientBillingService patientBillingService) {
+    public PatientController(PatientService patientService, BillingGrpcClientService billingGrpcClientService) {
         this.patientService = patientService;
-        this.patientBillingService = patientBillingService;
     }
 
     @GetMapping
@@ -66,11 +63,14 @@ public class PatientController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{patientId}/billing")
-    public ResponseEntity<String> billPatient(@PathVariable UUID patientId, @RequestParam double amount) {
-        String paymentStatus = patientBillingService.processPatientsPayment(patientId, amount);
-
-        return ResponseEntity.ok().body("Payment Status: " + paymentStatus);
-    }
+//    /**
+//     * Testing: Triggers the remote call to the Billing Service.
+//     * */
+//    @PostMapping("/{patientId}/billing")
+//    public ResponseEntity<String> billPatient(@PathVariable UUID patientId, @RequestParam double amount) {
+//        String paymentStatus = billingGrpcClientService.createBillingAccount(patientId, amount);
+//
+//        return ResponseEntity.ok().body("Payment Status: " + paymentStatus);
+//    }
 
 }

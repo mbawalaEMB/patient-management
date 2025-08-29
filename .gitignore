@@ -40,7 +40,8 @@ HELP.md
 !**/application-example.properties
 
 # ======== Docker ========
-
+# Ignore docker volumes
+**/postgres_data/
 
 # ======== environment ========
 **/.env
