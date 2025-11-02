@@ -2,6 +2,9 @@ HELP.md
 **/target/
 !**/src/main/**/target/
 !**/src/test/**/target/
+**/node_modules/
+**/logs/
+**/.DS_Store
 
 **/.mvn/wrapper/maven-wrapper.jar
 

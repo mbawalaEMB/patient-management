@@ -19,6 +19,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/patients")
+// TODO Remove Crossorigin when adding Security Config later
+@CrossOrigin(origins = "http://localhost:5173")
 @Tag(name = "Patient", description = "API for managing Patients")
 public class PatientController {
 
